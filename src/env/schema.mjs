@@ -20,7 +20,11 @@ export const serverSchema = z.object({
     // VERCEL_URL doesn't include `https` so it cant be validated as a URL
     process.env.VERCEL ? z.string() : z.string().url(),
   ),
-  OPENAI_API_KEY: z.string()
+  OPENAI_API_KEY: z.string(),
+  STRIPE_SECRET_KEY: requiredForProduction(),
+  STRIPE_WEBHOOK_SECRET: requiredForProduction(),
+  STRIPE_PRICE_MONTHLY: requiredForProduction(),
+  STRIPE_PRICE_YEARLY: requiredForProduction(),
 });
 
 /**
@@ -34,6 +38,10 @@ export const serverEnv = {
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  STRIPE_PRICE_MONTHLY: process.env.STRIPE_PRICE_MONTHLY,
+  STRIPE_PRICE_YEARLY: process.env.STRIPE_PRICE_YEARLY,
 };
 
 /**
@@ -42,7 +50,7 @@ export const serverEnv = {
  * To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 export const clientSchema = z.object({
-  // NEXT_PUBLIC_CLIENTVAR: z.string(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
 });
 
 /**
@@ -52,5 +60,5 @@ export const clientSchema = z.object({
  * @type {{ [k in keyof z.input<typeof clientSchema>]: string | undefined }}
  */
 export const clientEnv = {
-  // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 };

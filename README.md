@@ -1,114 +1,136 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/reworkd/AgentGPT/main/public/banner.png?token=GHSAT0AAAAAAB7JND3U3VGGF3UYYHGYO4RAZBSDJAQ" height="300"/>
-</p>
-<p align="center">
-  <em>🤖 Assemble, configure, and deploy autonomous AI Agents in your browser. 🤖 </em>
-</p>
-<p align="center">
-    <img alt="Node version" src="https://img.shields.io/static/v1?label=node&message=%20%3E=16.0.0&logo=node.js&color=2334D058" />
-</p>
+# OQanoon Research
 
-<p align="center">
-<a href="https://agentgpt.reworkd.ai">🔗 Short link</a>
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-<a href="#-getting-started">🤝 Contribute</a>
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-<a href="https://twitter.com/asimdotshrestha/status/1644883727707959296">🐦 Twitter</a>
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-<a href="https://discord.gg/3PccggEG">📢 Discord</a>
-</p>
+OQanoon Research is a **Legal Research & Interpretation System** (informational only, not legal advice). The platform lets authenticated users search official legal texts, view linked executive regulations, generate structured explanations with citations, and chat with an AI assistant while retaining full conversation history.
 
----
-<h2 align="center">
-💝 Support the Advancement of AgentGPT!! 💝
-</h2>
+> **Disclaimer:** Informational legal research tool. Not legal advice.
 
-<p align="center">
-Join us in fueling the development of AgentGPT, an open-source project pushing the boundaries of AI autonomy! We're facing challenges in covering the operational costs 💸, including in-house API and other infrastructure expenses, which is projected to grow to around $150 USD per day 💳🤕 Your sponsorship would drive progress by helping us scale up resources, enhance features and functionality, and continue to iterate on this exciting project! 🚀
-</p>
+## ✨ Core Features
 
-<p align="center">
-By sponsoring this free, open-source project, you not only have the opportunity to have your avatar/logo featured below, but also get the exclusive chance to chat with the founders!🗣️ 
-</p>
+- Keyword + article number search with filters and ranked results.
+- Article pages with three-column layout: official text, linked instruments, and AI explanations.
+- Context-aware chat for articles, regulations, or global research threads.
+- Conversation history logs with auto-generated titles.
+- Admin ingestion for text, PDF, or OCR workflows with review/approval steps.
+- Stripe subscriptions with trial gating.
 
-<p align="center">
-<a href="https://github.com/sponsors/reworkd-admin">👉 Click here</a> to support the project 
-</p>
+## 🧱 Tech Stack
 
+- **Frontend:** Next.js (TypeScript), Tailwind CSS
+- **Backend:** Next.js API routes
+- **Auth:** NextAuth credentials provider
+- **DB:** PostgreSQL + Prisma
+- **Payments:** Stripe (Checkout + webhooks)
+- **OCR:** Placeholder abstraction for OCR ingestion
 
----
+## ✅ Requirements
 
-AgentGPT allows you to configure and deploy Autonomous AI agents.
-Name your own custom AI and have it embark on any goal imaginable.
-It will attempt to reach the goal by thinking of tasks to do, executing them, and learning from the results 🚀.
+- Node.js 18+
+- PostgreSQL
 
-## 🎉 Features
+## 🔧 Setup
 
-This platform is currently in beta, we are currently working on:
-
-- Long term memory 🧠
-- Web browsing 🌐
-- Interaction with websites and people 👨‍👩‍👦
-
-More Coming soon...
-
-## 🚀 Tech Stack
-
-- ✅ **Bootstrapping**: [create-t3-app](https://create.t3.gg).
-- ✅ **Framework**: [Nextjs 13 + Typescript](https://nextjs.org/).
-- ✅ **Auth**: [Next-Auth.js](https://next-auth.js.org)
-- ✅ **ORM**: [Prisma](https://prisma.io).
-- ✅ **Database**: [Supabase](https://supabase.com/).
-- ✅ **Styling**: [TailwindCSS + HeadlessUI](https://tailwindcss.com).
-- ✅ **Typescript Schema Validation**: [Zod](https://github.com/colinhacks/zod).
-- ✅ **End-to-end typesafe API**: [tRPC](https://trpc.io/).
-
-## 👨‍🚀 Getting Started
-
-> 🚧 You will need [Nodejs +16 (LTS recommended)](https://nodejs.org/en/) installed.
-
-1. Fork this project:
-
-- [Click here](https://github.com/reworkd/AgentGPT/fork).
-
-2. Clone the repository:
-
-```bash
-git clone git@github.com:YOU_USER/AgentGPT.git
-```
-
-3. Install dependencies:
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-4. Create a **.env** file with the following content:
-
-> 🚧 The environment variables must match the following [schema](https://github.com/reworkd/AgentGPT/blob/main/src/env/schema.mjs).
+2. Create `.env`
 
 ```bash
-# Deployment Environment:
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/oqanoon
 NODE_ENV=development
-
-# Next Auth config:
-# Generate a secret with `openssl rand -base64 32`
 NEXTAUTH_SECRET=changeme
 NEXTAUTH_URL=http://localhost:3000
-
-# Prisma
-DATABASE_URL=file:./db.sqlite
-
-# External APIs:
 OPENAI_API_KEY=changeme
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_MONTHLY=price_...
+STRIPE_PRICE_YEARLY=price_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-5. Ready 🥳, now run:
+3. Run Prisma migrations + seed data
 
 ```bash
-# Create database migrations
-npx prisma db push
+npx prisma migrate dev
+npx prisma db seed
+```
 
-# Run the project:
+4. Start the app
+
+```bash
 npm run dev
 ```
+
+The seed creates:
+
+- 1 law with 5 articles
+- 1 regulation with 8 clauses
+- 3 mappings
+- 1 admin user: `admin@oqanoon.dev` / `admin1234`
+
+## 🔑 Authentication
+
+- Sign up via `/signup` (automatically enters a trial period).
+- Login via `/login`.
+- Admin routes require a user with `ADMIN` role.
+
+## 💳 Stripe Subscriptions
+
+- Plans are configured by Stripe price IDs.
+- Checkout sessions are created at `/api/stripe/create-checkout-session`.
+- Webhooks update subscription status at `/api/stripe/webhook`.
+
+## 🧪 Tests
+
+Basic tests are located in `src/tests` and can be run with:
+
+```bash
+node src/tests/search.test.mjs
+node src/tests/mappings.test.mjs
+node src/tests/chat.test.mjs
+```
+
+## 🐳 Docker (local)
+
+```bash
+docker build -t oqanoon-research .
+docker run --env-file .env -p 3000:3000 oqanoon-research
+```
+
+## 🗂️ Routes
+
+Public:
+
+- `/`
+- `/pricing`
+- `/login`
+- `/signup`
+
+App:
+
+- `/app/search`
+- `/app/provision/:id`
+- `/app/instrument/:id`
+- `/app/chat`
+- `/app/chat/:threadId`
+- `/app/billing`
+
+Admin:
+
+- `/admin`
+- `/admin/ingest`
+- `/admin/instruments`
+- `/admin/provisions`
+- `/admin/mappings`
+- `/admin/import`
+
+## ⚖️ Compliance Guardrails
+
+- The app includes a persistent disclaimer across pages.
+- Official legal texts are displayed verbatim.
+- AI explanations and chat responses are informational and citation-based.
+- Case-specific legal advice is refused and redirected to licensed counsel.
