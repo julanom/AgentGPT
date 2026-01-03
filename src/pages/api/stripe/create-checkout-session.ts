@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
+import { PlanBillingCycle } from "@prisma/client";
+
 import { authOptions } from "../../../server/auth";
 import { createCheckoutSession } from "../../../server/stripe";
 import { prisma } from "../../../server/db";
@@ -20,6 +22,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { plan } = req.body as { plan: "monthly" | "yearly" };
   const priceId =
     plan === "yearly" ? env.STRIPE_PRICE_YEARLY : env.STRIPE_PRICE_MONTHLY;
+  const billingCycle =
+    plan === "yearly" ? PlanBillingCycle.YEARLY : PlanBillingCycle.MONTHLY;
 
   if (!priceId) {
     return res.status(400).json({ message: "Stripe pricing is not configured" });
@@ -35,9 +39,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     metadata: { plan_cycle: plan },
   });
 
+  const selectedPlan = await prisma.plan.findFirst({
+    where: { billingCycle },
+  });
+
   await prisma.subscription.updateMany({
     where: { userId: session.user.id },
-    data: { stripeCustomerId: checkoutSession.customer ?? null },
+    data: {
+      stripeCustomerId: checkoutSession.customer ?? null,
+      ...(selectedPlan ? { planId: selectedPlan.id } : {}),
+    },
   });
 
   return res.status(200).json({ url: checkoutSession.url });
