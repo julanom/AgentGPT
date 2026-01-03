@@ -1,0 +1,30 @@
+export const buildExplanation = ({
+  provisionText,
+  provisionCitation,
+  mappedCitations,
+  relatedTitles,
+}) => {
+  return [
+    "Plain meaning:",
+    `This provision summarizes ${provisionText.toLowerCase()} ${provisionCitation}.`,
+    "",
+    "Who it applies to:",
+    "It generally applies to regulated commercial entities and relevant agencies referenced in the law.",
+    "",
+    "Key obligations / requirements:",
+    "It highlights required actions such as registration, record-keeping, or reporting steps described in the official text.",
+    "",
+    "Exceptions / limitations:",
+    "Review any carve-outs listed in the official text and related regulations before relying on the requirement.",
+    "",
+    "Operational interpretation (generic, not advice):",
+    "Organizations typically align internal policies with the cited regulations and maintain audit-ready documentation.",
+    "",
+    "Related articles:",
+    relatedTitles.length > 0 ? relatedTitles.join(", ") : "No related provisions mapped yet.",
+    "",
+    mappedCitations.length > 0 ? `Citations: ${mappedCitations.join(" ")}` : "Citations: None.",
+    "",
+    "Informational legal research tool. Not legal advice.",
+  ].join("\n");
+};

@@ -5,7 +5,9 @@ import {
   type DefaultSession,
 } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./db";
+import { verifyPassword } from "./password.mjs";
 
 /**
  * Module augmentation for `next-auth` types
@@ -17,6 +19,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -38,6 +41,7 @@ export const authOptions: NextAuthOptions = {
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.role = user.role ?? "USER";
         // session.user.role = user.role; <-- put other properties on the session here
       }
       return session;
@@ -45,15 +49,28 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    /**
-     * ...add more providers here
-     *
-     * Most other providers require a bit more work than the Discord provider.
-     * For example, the GitHub provider requires you to add the
-     * `refresh_token_expires_in` field to the Account model. Refer to the
-     * NextAuth.js docs for the provider you want to use. Example:
-     * @see https://next-auth.js.org/providers/github
-     **/
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email?.toLowerCase();
+        if (!email || !credentials?.password) {
+          return null;
+        }
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user?.passwordHash) {
+          return null;
+        }
+        const isValid = verifyPassword(credentials.password, user.passwordHash);
+        if (!isValid) {
+          return null;
+        }
+        return { id: user.id, email: user.email, name: user.name, role: user.role };
+      },
+    }),
   ],
 };
 
