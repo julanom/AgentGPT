@@ -32,6 +32,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     priceId,
     successUrl: `${origin}/app/billing?status=success`,
     cancelUrl: `${origin}/app/billing?status=cancel`,
+    metadata: { plan_cycle: plan },
   });
 
   await prisma.subscription.updateMany({

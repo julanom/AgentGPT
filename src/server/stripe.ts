@@ -26,11 +26,13 @@ export const createCheckoutSession = async ({
   priceId,
   successUrl,
   cancelUrl,
+  metadata,
 }: {
   customerEmail: string;
   priceId: string;
   successUrl: string;
   cancelUrl: string;
+  metadata?: Record<string, string>;
 }) => {
   const params = new URLSearchParams();
   params.append("mode", "subscription");
@@ -40,6 +42,11 @@ export const createCheckoutSession = async ({
   params.append("line_items[0][price]", priceId);
   params.append("line_items[0][quantity]", "1");
   params.append("allow_promotion_codes", "true");
+  if (metadata) {
+    Object.entries(metadata).forEach(([key, value]) => {
+      params.append(`metadata[${key}]`, value);
+    });
+  }
 
   return stripeRequest("/checkout/sessions", params);
 };

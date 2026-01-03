@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { SubscriptionStatus } from "@prisma/client";
+import { PlanBillingCycle, SubscriptionStatus } from "@prisma/client";
 
 import { verifyStripeSignature } from "../../../server/stripe";
 import { prisma } from "../../../server/db";
@@ -36,15 +36,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       customer: string | null;
       subscription: string | null;
       customer_email: string | null;
+      metadata?: Record<string, string>;
     };
 
     if (session.customer_email) {
+      const planCycle = session.metadata?.plan_cycle;
+      const billingCycle =
+        planCycle === "yearly"
+          ? PlanBillingCycle.YEARLY
+          : planCycle === "monthly"
+            ? PlanBillingCycle.MONTHLY
+            : null;
+      const plan = billingCycle
+        ? await prisma.plan.findFirst({ where: { billingCycle } })
+        : null;
       await prisma.subscription.updateMany({
         where: { user: { email: session.customer_email } },
         data: {
           status: SubscriptionStatus.ACTIVE,
           stripeCustomerId: session.customer,
           stripeSubscriptionId: session.subscription,
+          ...(plan ? { planId: plan.id } : {}),
         },
       });
     }
